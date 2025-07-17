@@ -1,18 +1,16 @@
-import {Request, Response } from 'express';
-import {Task} from '../interfaces/task.interface';
+import Task from '../models/task.model';
+import User from '../models/user.model';
 
-export const createTask = (req: Request, res: Response) => {
-    const task: Task = req.body;
-    console.log('New task:', task);
-    // Here you would typically save to a database
-    res.status(201).json({
-        message: 'Task created successfully',
-        task
+const createTask = async(userId: string, taskData: Partial<Task>) => {
+    const task = new Task({
+        ...taskData,
+        userId,
     });
-};
+    return await task.save();
+}
 
-export const getTasks = (req: Request, res: Response) => {
-    res.status(200).json({
-        message: 'List of tasks will be returned here'
-    });
+const getUserWithTasks = async(userId: string) => {
+    const user = await User.findById(userId).populate('tasks');
+    const tasks = await Task.find({userId});
+    return {user, tasks};
 }
